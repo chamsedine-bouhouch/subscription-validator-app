@@ -1,23 +1,19 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import sequelize from './db.js'
+dotenv.config();
+
 import inscriptionsRoutes from './routes/inscriptions.js';
 
-  dotenv.config();
- 
+import sequelize from './db.js'
+
 const app = express();
+
+// Middlewares
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// sequelize.sync({ force: true }) // or { alter: true }
-//   .then(() => {
-//     console.log('All models were synchronized successfully.');
-//   })
-//   .catch((err) => {
-//     console.error('Error syncing models:', err);
-//   });
-
-// Example route
+// Root route — for testing DB connection
 app.get('/', async (req, res) => {
   try {
     await sequelize.authenticate();
@@ -31,8 +27,12 @@ app.get('/', async (req, res) => {
 // Mount the route
 app.use('/api/inscriptions', inscriptionsRoutes);
 
-app.listen(3000, () => {
-    console.log('Server running on http://localhost:3000');
+// Start server (only if not in Vercel’s serverless mode)
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
   });
+}
 // Required for Vercel to handle the Express app as a function
 export default app;
