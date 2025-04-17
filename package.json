@@ -1,15 +1,24 @@
 {
   "name": "subscription-validator-app",
   "version": "1.0.0",
+  "description": "API to manage inscriptions and users using Express, Sequelize, and Supabase",
+  "author": "Chamseddine Bouhouch",
+  "license": "MIT",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "seed": "node seed.js"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
-    "express": "^5.1.0"
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "pg": "^8.14.1",
+    "sequelize": "^6.37.7"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.14.1"
   }
 }
