@@ -6,7 +6,8 @@ export const errorHandler = (err, req, res, next) => {
         return res.status(err.statusCode).json({ message: err.message });
     }
 
-    // Handle unexpected errors
-    console.error(err);
-    res.status(500).json({ message: 'Internal Server Error', error: 'Something went wrong' });
+    res.status(500).json({
+        message: err.message || 'Internal Server Error',
+        ...(process.env.NODE_ENV !== 'production' && { stack: err.stack })
+    });
 };
