@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 dotenv.config();
 
+import authRoutes from './routes/auth.js';
 import inscriptionsRoutes from './routes/inscriptions.js';
 
 import sequelize from './db.js'
@@ -27,8 +28,9 @@ app.get('/', async (req, res) => {
   }
 });
 
-
 // Mount the route
+app.use('/api/auth', authRoutes);
+
 app.use('/api/inscriptions', inscriptionsRoutes);
 
 // Start server (only if not in Vercel’s serverless mode)
