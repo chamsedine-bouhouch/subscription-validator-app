@@ -7,23 +7,26 @@ dotenv.config();
 (async () => {
   try {
     console.log('🌱 Starting seed process...');
-    await sequelize.sync({ force: true }); // Reset DB
+
+    // Reset and sync DB
+    await sequelize.sync({ force: true });
 
     // 1. Create default admin user
+    //  (password will be hashed via model hook)
     const adminUser = await User.create({
       email: 'admin@example.com',
-      password: 'admin_hashed_password',
+      password: 'admin123',
       role: 'admin',
     });
 
     // 2. Create two inscriptions
-    const inscription1 = await Inscription.create({
+    const alice = await Inscription.create({
       name: 'Alice',
       lastname: 'Wonderland',
       email: 'alice@example.com',
     });
 
-    const inscription2 = await Inscription.create({
+    const bob = await Inscription.create({
       name: 'Bob',
       lastname: 'Builder',
       email: 'bob@example.com',
@@ -32,12 +35,12 @@ dotenv.config();
     // 3. Create user from one inscription (validated)
     const user = await User.create({
       email: 'alice@example.com',
-      password: 'user_hashed_password',
+      password: 'alicepass',
       role: 'user',
     });
 
     // 4. Link inscription to user and validate
-    await inscription1.update({
+    await alice.update({
       validated: true,
       user_id: user.id,
       validation_date: new Date(),
