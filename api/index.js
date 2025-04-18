@@ -5,6 +5,7 @@ import express from 'express';
 
 import authRoutes from './routes/auth.js';
 import inscriptionsRoutes from './routes/inscriptions.js';
+import userRoutes from './routes/userRoutes.js';
 
 import sequelize from './db.js'
 import { errorHandler } from './middlewares/errorHandler.js';
@@ -34,6 +35,8 @@ app.get('/', async (req, res) => {
 app.use('/api/auth', authRoutes);
 
 app.use('/api/inscriptions', inscriptionsRoutes);
+
+app.use('/api/users', userRoutes);
 
 // Start server (only if not in Vercel’s serverless mode)
 if (process.env.NODE_ENV !== 'production') {
