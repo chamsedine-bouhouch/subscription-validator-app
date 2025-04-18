@@ -25,6 +25,8 @@ const User = sequelize.define('User', {
 }, {
   tableName: 'user',
   timestamps: true,
+  underscored: true, // 👈 converts createdAt → created_at, etc.
+
 });
 
 export default User;

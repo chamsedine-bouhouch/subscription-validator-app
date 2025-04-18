@@ -40,6 +40,7 @@ const Inscription = sequelize.define('Inscription', {
 }, {
   tableName: 'inscription',
   timestamps: true,
+  underscored: true, // 👈 created_at, updated_at
 });
 
 export default Inscription;
