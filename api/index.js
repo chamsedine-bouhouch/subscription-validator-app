@@ -7,6 +7,7 @@ import authRoutes from './routes/auth.js';
 import inscriptionsRoutes from './routes/inscriptions.js';
 
 import sequelize from './db.js'
+import { errorHandler } from './middlewares/errorHandler.js';
 
 sequelize.sync({ alter: true }) // or { force: true } to drop & recreate
   .then(() => console.log('Database synced!'))
@@ -41,5 +42,9 @@ if (process.env.NODE_ENV !== 'production') {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
   });
 }
+
+// Global error handler (always last)
+app.use(errorHandler);
+
 // Required for Vercel to handle the Express app as a function
 export default app;
