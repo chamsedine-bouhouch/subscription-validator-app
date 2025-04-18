@@ -1,18 +1,22 @@
 import sequelize from './api/db.js';
-import Inscription from './api/models/Inscription.js';
-import User from './api/models/User.js';
+import { User, Inscription } from './api/models/index.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
 (async () => {
   try {
-    console.log('Loaded DATABASE_URL:', process.env.DATABASE_URL);
+    console.log('🌱 Starting seed process...');
+    await sequelize.sync({ force: true }); // Reset DB
 
-    // await sequelize.sync({ force: true });
-    console.log("✅ DB synced");
+    // 1. Create default admin user
+    const adminUser = await User.create({
+      email: 'admin@example.com',
+      password: 'admin_hashed_password',
+      role: 'admin',
+    });
 
-    // Create two inscription rows
+    // 2. Create two inscriptions
     const inscription1 = await Inscription.create({
       name: 'Alice',
       lastname: 'Wonderland',
@@ -25,15 +29,24 @@ dotenv.config();
       email: 'bob@example.com',
     });
 
-    // Create one user linked to one of the inscriptions
-    await User.create({
-      user_id: inscription1.id,
-      password: 'hashed_password',
+    // 3. Create user from one inscription (validated)
+    const user = await User.create({
+      email: 'alice@example.com',
+      password: 'user_hashed_password',
+      role: 'user',
     });
 
-    console.log("✅ DB seeded");
+    // 4. Link inscription to user and validate
+    await inscription1.update({
+      validated: true,
+      user_id: user.id,
+      validation_date: new Date(),
+      bearer_token: 'fake-bearer-token-123',
+    });
+
+    console.log('✅ Seeding completed successfully!');
   } catch (error) {
-    console.error("❌ Error during seeding:", error);
+    console.error('❌ Seeding failed:', error);
   } finally {
     await sequelize.close();
   }

@@ -2,16 +2,19 @@ import sequelize from '../db.js';
 import Inscription from './Inscription.js';
 import User from './User.js';
 
-// Set up associations
-User.belongsTo(Inscription, {
+// Define relationships
+User.hasOne(Inscription, {
   foreignKey: 'user_id',
-  targetKey: 'id',
-  onDelete: 'CASCADE',
+  as: 'inscription',
 });
 
-Inscription.hasOne(User, {
+Inscription.belongsTo(User, {
   foreignKey: 'user_id',
-  sourceKey: 'id',
+  as: 'user',
 });
 
-export { sequelize, Inscription, User };
+export {
+  sequelize,
+  Inscription,
+  User,
+};

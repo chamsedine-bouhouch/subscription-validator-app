@@ -1,23 +1,30 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../db.js';
-import Inscription from './Inscription.js';
 
 const User = sequelize.define('User', {
-  user_id: {
+  id: {
     type: DataTypes.BIGINT,
+    autoIncrement: true,
     primaryKey: true,
-    references: {
-      model: Inscription,
-      key: 'id',
-    },
+  },
+  email: {
+    type: DataTypes.STRING,
+    unique: true,
+    allowNull: false,
+    validate: { isEmail: true }
   },
   password: {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  role: {
+    type: DataTypes.ENUM('user', 'admin'),
+    defaultValue: 'user',
+    allowNull: false,
+  },
 }, {
   tableName: 'user',
-  timestamps: false,
+  timestamps: true,
 });
 
 export default User;

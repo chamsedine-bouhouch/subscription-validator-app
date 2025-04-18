@@ -1,0 +1,9 @@
+- [ ] login form admin
+- [ ] page validataion :array of request (inscrit)
+  - [ ] button validate, update( validated, validation_date )
+  - [ ] generate token ( 1 min JWT ) update(bearer_token)
+    - rules:
+    - one time validation
+    - if valid return same token
+    - else generate a new one
+- [ ] sent email

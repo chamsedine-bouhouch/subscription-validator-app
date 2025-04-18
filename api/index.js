@@ -6,6 +6,10 @@ import inscriptionsRoutes from './routes/inscriptions.js';
 
 import sequelize from './db.js'
 
+sequelize.sync({ alter: true }) // or { force: true } to drop & recreate
+  .then(() => console.log('Database synced!'))
+  .catch((err) => console.error('Sync error:', err));
+
 const app = express();
 
 // Middlewares
