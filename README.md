@@ -1,6 +1,8 @@
+
 # We Settle API
 
-A minimal backend API using Express.js, Sequelize ORM, and Supabase PostgreSQL — deployed on Vercel as a serverless function.
+A backend API built with **Express.js**, **Sequelize**, and **Supabase PostgreSQL**, deployed on **Vercel** as a serverless function.  
+Designed to manage inscription validation and JWT token-based access for users.
 
 ---
 
@@ -11,14 +13,17 @@ A minimal backend API using Express.js, Sequelize ORM, and Supabase PostgreSQL �
 ├── db.js                   # Sequelize config with Supabase
 ├── index.js                # Express app entry (Vercel-compatible)
 ├── models/
-│   ├── index.js            # Sequelize associations (optional)
+│   ├── index.js            # Sequelize associations
 │   ├── Inscription.js      # Main data model
 │   └── User.js             # Linked user model
 ├── routes/
-│   └── inscriptions.js     # Routes for GET/POST inscriptions
+│   └── inscriptions.js     # Routes for GET/POST/validate/token
+├── middlewares/
+│   └── auth.js             # JWT Bearer token middleware
 ├── .env                    # Environment variables
-├── package.json            # Project metadata and dependencies
-├── vercel.json             # Vercel config for serverless deploy
+├── seed.js                 # Seed script with faker
+├── package.json            # Project metadata
+├── vercel.json             # Vercel deployment config
 ```
 
 ---
@@ -32,17 +37,14 @@ git clone https://github.com/your-username/we-settle-api.git
 cd we-settle-api
 ```
 
-### 2. Add Your Supabase DB URL
+### 2. Configure Environment
 
 Create a `.env` file at the root:
 
 ```
 DATABASE_URL=postgresql://your_user:your_pass@db.xxxxx.supabase.co:5432/your_db
+JWT_SECRET=your_super_secret_key
 ```
-
-You can find this in Supabase → Project Settings → Database → Connection Info.
-
----
 
 ### 3. Install Dependencies
 
@@ -50,54 +52,49 @@ You can find this in Supabase → Project Settings → Database → Connection I
 npm install
 ```
 
----
-
 ### 4. Run Locally
 
-Use Vercel dev server:
-
 ```bash
-npx vercel dev
+npm run dev
 ```
 
-Your server will be available at:  
-[http://localhost:3000/api/inscriptions](http://localhost:3000/api/inscriptions)
+Your server will be running at:  
+[http://localhost:3000](http://localhost:3000)
+
+---
+
+## 🧬 Seed the Database (Optional)
+
+Use Faker to generate 30 fake inscriptions:
+
+```bash
+vercel dev
+
+npm run seed
+
+npm run seed-inscriptions
+```
 
 ---
 
 ## 🚀 Deploy to Vercel
 
-1. Login and initialize:
-
-   ```bash
-   vercel login
-   vercel init
-   ```
-
-2. Set environment variable:
-
-   ```bash
-   vercel env add DATABASE_URL
-   ```
-
-3. Deploy:
-   ```bash
-   vercel --prod
-   ```
+```bash
+vercel login
+vercel env add DATABASE_URL
+vercel env add JWT_SECRET
+vercel --prod
+```
 
 ---
 
 ## 📬 API Endpoints
 
 ### `GET /api/inscriptions`
-
-Returns all inscription entries.
+Fetch all inscriptions.
 
 ### `POST /api/inscriptions`
-
-Creates a new inscription.
-
-#### Request body:
+Create a new inscription.
 
 ```json
 {
@@ -107,28 +104,62 @@ Creates a new inscription.
 }
 ```
 
-#### cURL Example:
+---
 
-```bash
-curl -X POST http://your-api-domain.com/api/inscriptions \
-     -H "Content-Type: application/json" \
-     -d '{
-           "name": "Chamseddine",
-           "lastname": "Bouhouch",
-           "email": "bouhouchchamseddine@gmail.com"
-         }'
+### `POST /api/inscriptions/:id/validate`
+Validate an inscription by ID.  
+Sets `validated: true`, generates `validation_date`.
+
+---
+
+### `GET /api/inscriptions/token/:id`
+Generates a JWT bearer token (valid for 1 minute).  
+Only available after validation.
+
+```json
+{
+  "bearer_token": "eyJhbGciOiJIUzI1NiIs..."
+}
+```
+
+---
+
+### `GET /api/protected` _(example)_
+Use `Authorization: Bearer <token>` to access protected routes.
+
+---
+
+## 🔒 Auth Middleware
+
+Use `/middlewares/auth.js` to protect routes via JWT bearer token:
+
+```http
+Authorization: Bearer your_jwt_token
+```
+
 ---
 
 ## 🧱 Tech Stack
 
 - **Backend:** Express.js
 - **ORM:** Sequelize
-- **Database:** Supabase (PostgreSQL)
+- **Database:** Supabase PostgreSQL
+- **Auth:** JWT Bearer Tokens
+- **Email (WIP):** Nodemailer or external service
 - **Hosting:** Vercel (Serverless Functions)
+
+---
+
+## 🌐 Frontend Integration
+
+Use this API with your Vue 3 frontend using Axios + Pinia:
+
+- `/auth/login`: custom login
+- `/inscriptions`: admin dashboard to manage users
+- Token stored in localStorage with `pinia-plugin-persistedstate`
 
 ---
 
 ## 📄 License
 
-MIT © 2025 Chamseddine Bouhouch
-```
+MIT © 2025 [Chamseddine Bouhouch](mailto:bouhouchchamseddine@gmail.com)
