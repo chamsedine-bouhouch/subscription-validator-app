@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import express from 'express';
+import cors from 'cors';
 
 
 import authRoutes from './routes/auth.js';
@@ -15,6 +16,13 @@ sequelize.sync({ alter: true }) // or { force: true } to drop & recreate
   .catch((err) => console.error('Sync error:', err));
 
 const app = express();
+// ✅ Enable CORS
+app.use(
+  cors({
+    origin: 'http://localhost:5173', // or use "*" for all origins
+    credentials: true,
+  })
+);
 
 // Middlewares
 

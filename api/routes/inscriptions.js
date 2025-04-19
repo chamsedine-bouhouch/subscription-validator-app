@@ -1,5 +1,6 @@
 import express from 'express';
 import Inscription from '../models/Inscription.js';
+import { authGuard } from '../middlewares/authGuard.js';
 
 const router = express.Router();
 

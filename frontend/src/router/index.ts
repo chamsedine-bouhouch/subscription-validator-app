@@ -18,20 +18,10 @@ const router = createRouter({
   ],
 })
 
-// Navigation guard to check authentication
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
-  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
-
-  if (requiresAuth && !authStore.isLoggedIn) {
-    // Check if token exists and is valid
-    const isAuthenticated = await authStore.checkAuth()
-
-    if (!isAuthenticated) {
-      next({ name: 'Login' })
-    } else {
-      next()
-    }
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    next({ name: 'Login' })
   } else {
     next()
   }
