@@ -307,7 +307,7 @@
                       scope="col"
                       class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      Date
+                      Creation Date
                     </th>
                     <th
                       scope="col"
@@ -320,6 +320,12 @@
                       class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
                       Token
+                    </th>
+                    <th
+                      scope="col"
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Validation Date
                     </th>
                     <th
                       scope="col"
@@ -344,7 +350,7 @@
                       {{ inscription.name }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {{ formatDate(inscription.date) }}
+                      {{ formatDate(inscription.createdAt) }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                       <span
@@ -359,10 +365,13 @@
                       </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <span v-if="inscription.token">
-                        {{ inscription.token.substring(0, 8) }}...
+                      <span v-if="inscription.bearer_token">
+                        {{ inscription.bearer_token.substring(0, 8) }}...
                       </span>
                       <span v-else class="text-gray-400"> Not generated </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {{ formatDate(inscription.validation_date) }}
                     </td>
                     <td
                       class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
@@ -652,10 +661,12 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth"; // adjust the path as needed
+import { useInscriptionStore } from "@/stores/useInscriptionStore";
 
 const authStore = useAuthStore();
+const store = useInscriptionStore();
+
 // Sample data - replace with actual API calls in production
-const inscriptions = ref([]);
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
 const searchQuery = ref("");
@@ -683,17 +694,6 @@ const userInitials = computed(() => {
     .substring(0, 2);
 });
 
-// User data (replace with actual authentication)
-// const user = ref({
-//   name: 'John Doe',
-//   email: 'john.doe@example.com'
-// });
-
-// const userInitials = computed(() => {
-//   const nameParts = user.value.name.split(' ');
-//   return nameParts.map(part => part.charAt(0).toUpperCase()).join('');
-// });
-
 // Navigation methods (replace with actual routing)
 const navigateToProfile = () => {
   // In a real app, this would navigate to the profile page
@@ -717,7 +717,7 @@ const logout = () => {
 
 // Generate sample data
 onMounted(() => {
-  generateSampleData();
+  store.fetchInscriptions();
 
   // Add click outside listener for profile dropdown
   document.addEventListener("click", (event) => {
@@ -728,21 +728,6 @@ onMounted(() => {
   });
 });
 
-const generateSampleData = () => {
-  const sampleData = [];
-  for (let i = 1; i <= 57; i++) {
-    const validated = Math.random() > 0.4;
-    sampleData.push({
-      id: `INS-${String(i).padStart(4, "0")}`,
-      name: `Inscription ${i}`,
-      date: new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000),
-      validated: validated,
-      token: validated && Math.random() > 0.3 ? generateRandomToken() : null,
-    });
-  }
-  inscriptions.value = sampleData;
-};
-
 const generateRandomToken = () => {
   return (
     "tk_" +
@@ -752,7 +737,7 @@ const generateRandomToken = () => {
 
 // Computed properties
 const filteredInscriptions = computed(() => {
-  let filtered = [...inscriptions.value];
+  let filtered = [...store.inscriptions];
 
   // Apply search filter
   if (searchQuery.value) {
@@ -780,14 +765,14 @@ const filteredInscriptions = computed(() => {
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     if (dateRangeFilter.value === "today") {
-      filtered = filtered.filter((item) => item.date >= today);
+      filtered = filtered.filter((item) => item.createdAt >= today);
     } else if (dateRangeFilter.value === "week") {
       const weekStart = new Date(today);
       weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-      filtered = filtered.filter((item) => item.date >= weekStart);
+      filtered = filtered.filter((item) => item.createdAt >= weekStart);
     } else if (dateRangeFilter.value === "month") {
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-      filtered = filtered.filter((item) => item.date >= monthStart);
+      filtered = filtered.filter((item) => item.createdAt >= monthStart);
     }
   }
 
@@ -840,12 +825,12 @@ const displayedPages = computed(() => {
 });
 
 // Stats
-const totalInscriptions = computed(() => inscriptions.value.length);
+const totalInscriptions = computed(() => store.inscriptions.length);
 const validatedCount = computed(
-  () => inscriptions.value.filter((item) => item.validated).length
+  () => store.inscriptions.filter((item) => item.validated).length
 );
 const tokensGeneratedCount = computed(
-  () => inscriptions.value.filter((item) => item.token).length
+  () => store.inscriptions.filter((item) => item.token).length
 );
 
 // Methods
@@ -864,9 +849,9 @@ const refreshData = () => {
 
 const validateInscription = (inscription) => {
   // In a real app, this would call an API to validate the inscription
-  const index = inscriptions.value.findIndex((item) => item.id === inscription.id);
+  const index = store.inscriptions.findIndex((item) => item.id === inscription.id);
   if (index !== -1) {
-    inscriptions.value[index].validated = true;
+    store.inscriptions[index].validated = true;
   }
 };
 
@@ -920,19 +905,19 @@ const copyToken = async () => {
 
 const generateToken = (inscription) => {
   // In a real app, this would call an API to generate a token
-  const index = inscriptions.value.findIndex((item) => item.id === inscription.id);
+  const index = store.inscriptions.findIndex((item) => item.id === inscription.id);
   if (index !== -1) {
     // Generate the token
     const newToken = generateRandomToken();
 
     // Update the inscription in the array
-    inscriptions.value[index] = {
-      ...inscriptions.value[index],
+    store.inscriptions[index] = {
+      ...store.inscriptions[index],
       token: newToken,
     };
 
     // Set the selected inscription for the modal
-    selectedInscription.value = inscriptions.value[index];
+    selectedInscription.value = store.inscriptions[index];
 
     // Reset copied state
     copied.value = false;
