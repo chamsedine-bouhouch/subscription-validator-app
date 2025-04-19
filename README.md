@@ -33,8 +33,8 @@ Designed to manage inscription validation and JWT token-based access for users.
 ### 1. Clone the Repo
 
 ```bash
-git clone https://github.com/your-username/we-settle-api.git
-cd we-settle-api
+git clone https://github.com/chamsedine-bouhouch/subscription-validator-app.git
+cd subscription-validator-app
 ```
 
 ### 2. Configure Environment
@@ -56,6 +56,8 @@ npm install
 
 ```bash
 npm run dev
+or
+vercel dev
 ```
 
 Your server will be running at:  
@@ -68,8 +70,6 @@ Your server will be running at:
 Use Faker to generate 30 fake inscriptions:
 
 ```bash
-vercel dev
-
 npm run seed
 
 npm run seed-inscriptions
