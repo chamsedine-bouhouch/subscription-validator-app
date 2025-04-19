@@ -3,7 +3,7 @@ import Inscription from '../models/Inscription.js';
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
+router.get('/', authGuard('user', 'admin'), async (req, res) => {
     try {
         const inscriptions = await Inscription.findAll();
         res.json(inscriptions);
