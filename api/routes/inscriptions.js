@@ -1,6 +1,8 @@
 import express from 'express';
 import Inscription from '../models/Inscription.js';
 import { authGuard } from '../middlewares/authGuard.js';
+import { generateJWT, isTokenValid } from '../utils/generateToken.js';
+
 
 const router = express.Router();
 
@@ -28,7 +30,7 @@ router.post('/', async (req, res) => {
             lastname,
             email,
             validated: false,
-            bearer_token: generateToken(), // à définir ou laisser vide
+            bearer_token: null,
             validation_date: null,
         });
 
@@ -39,8 +41,70 @@ router.post('/', async (req, res) => {
     }
 });
 
-// 🔐 Simple token generator (optionnel)
-function generateToken(length = 24) {
-    return Math.random().toString(36).substring(2, 2 + length);
-}
+// POST /:id/validate — validate an inscription once
+router.post('/:id/validate', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const inscription = await Inscription.findByPk(id);
+        if (!inscription) {
+            return res.status(404).json({ error: 'Inscription not found' });
+        }
+
+        if (inscription.validated) {
+            return res.status(400).json({ error: 'Inscription already validated' });
+        }
+
+        inscription.validated = true;
+        inscription.validation_date = new Date();
+        await inscription.save();
+
+        // TODO: Send confirmation email
+
+        res.json({ message: 'Inscription validated successfully' });
+    } catch (error) {
+        console.error('Error validating inscription:', error);
+        res.status(500).json({ error: 'Failed to validate inscription' });
+    }
+});
+
+// GET /token/:id — generate JWT after validation
+router.get('/token/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const inscription = await Inscription.findByPk(id);
+        if (!inscription) {
+            return res.status(404).json({ error: 'Inscription not found' });
+        }
+
+        if (!inscription.validated) {
+            return res.status(400).json({ error: 'Inscription must be validated first' });
+        }
+
+        // Check if existing token is still valid
+        if (inscription.bearer_token && isTokenValid(inscription.bearer_token)) {
+            return res.json({
+                message: 'Existing valid token',
+                bearer_token: inscription.bearer_token
+            });
+        }
+
+        // Generate new token
+        const token = generateJWT(inscription.id);
+        inscription.bearer_token = token;
+        await inscription.save();
+
+        // TODO: Send token by email
+
+        res.json({
+            message: 'New token generated and saved',
+            bearer_token: token
+        });
+    } catch (error) {
+        console.error('Error generating token:', error);
+        res.status(500).json({ error: 'Failed to generate token' });
+    }
+});
+
 export default router;

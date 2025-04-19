@@ -337,7 +337,7 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                   <tr
-                    v-for="inscription in filteredInscriptions"
+                    v-for="inscription in paginatedInscriptions"
                     :key="inscription.id"
                     class="hover:bg-gray-50"
                   >
@@ -374,34 +374,39 @@
                       {{ formatDate(inscription.validation_date) }}
                     </td>
                     <td
-                      class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
+                      class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2"
                     >
                       <button
                         v-if="!inscription.validated"
-                        @click="validateInscription(inscription)"
-                        class="text-emerald-600 hover:text-emerald-900 mr-4"
+                        @click="onValidate(inscription.id)"
+                        class="text-emerald-600 hover:text-emerald-800"
+                        title="Validate"
                       >
-                        Validate
+                        <CheckCircleIcon class="w-5 h-5 inline" />
                       </button>
+
                       <button
-                        v-if="inscription.validated && !inscription.token"
+                        v-if="inscription.validated"
                         @click="generateToken(inscription)"
-                        class="text-blue-600 hover:text-blue-900"
+                        class="text-blue-600 hover:text-blue-800"
+                        title="Generate Token"
                       >
-                        Generate Token
+                        <KeyIcon class="w-5 h-5 inline" />
                       </button>
+
                       <button
-                        v-if="inscription.token"
+                        v-if="inscription.bearer_token"
                         @click="viewDetails(inscription)"
-                        class="text-gray-600 hover:text-gray-900"
+                        class="text-gray-600 hover:text-gray-800"
+                        title="View Details"
                       >
-                        View Details
+                        <EyeIcon class="w-5 h-5 inline" />
                       </button>
                     </td>
                   </tr>
 
                   <!-- Empty state -->
-                  <tr v-if="filteredInscriptions.length === 0">
+                  <tr v-if="paginatedInscriptions.length === 0">
                     <td colspan="6" class="px-6 py-10 text-center text-sm text-gray-500">
                       <div class="flex flex-col items-center justify-center">
                         <svg
@@ -613,7 +618,7 @@
               <div class="mt-4">
                 <div class="flex items-center justify-between bg-gray-50 rounded-md p-3">
                   <code class="text-sm text-gray-800 flex-1 text-left overflow-x-auto">{{
-                    selectedInscription?.token
+                    selectedInscription?.bearer_token
                   }}</code>
                   <button
                     type="button"
@@ -658,10 +663,11 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth"; // adjust the path as needed
 import { useInscriptionStore } from "@/stores/useInscriptionStore";
+import { CheckCircleIcon, KeyIcon, EyeIcon } from "@heroicons/vue/20/solid";
 
 const authStore = useAuthStore();
 const store = useInscriptionStore();
@@ -728,13 +734,6 @@ onMounted(() => {
   });
 });
 
-const generateRandomToken = () => {
-  return (
-    "tk_" +
-    Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join("")
-  );
-};
-
 // Computed properties
 const filteredInscriptions = computed(() => {
   let filtered = [...store.inscriptions];
@@ -755,24 +754,34 @@ const filteredInscriptions = computed(() => {
     } else if (statusFilter.value === "pending") {
       filtered = filtered.filter((item) => !item.validated);
     } else if (statusFilter.value === "token-generated") {
-      filtered = filtered.filter((item) => item.token);
+      filtered = filtered.filter((item) => item.bearer_token);
     }
   }
 
   // Apply date filter
   if (dateRangeFilter.value !== "all") {
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const now = new Date("2023-10-01T00:00:00Z");
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()); // midnight
+
+    let rangeStart: Date | null = null;
 
     if (dateRangeFilter.value === "today") {
-      filtered = filtered.filter((item) => item.createdAt >= today);
+      rangeStart = today;
     } else if (dateRangeFilter.value === "week") {
       const weekStart = new Date(today);
-      weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-      filtered = filtered.filter((item) => item.createdAt >= weekStart);
+      weekStart.setDate(weekStart.getDate() - weekStart.getDay()); // Sunday start
+      rangeStart = weekStart;
     } else if (dateRangeFilter.value === "month") {
-      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-      filtered = filtered.filter((item) => item.createdAt >= monthStart);
+      rangeStart = new Date(now.getFullYear(), now.getMonth(), 1); // 1st of month
+    }
+
+    if (rangeStart) {
+      const startStr = rangeStart.toISOString().split("T")[0];
+      filtered = filtered.filter((item) => {
+        const createdStr = new Date(item.createdAt).toISOString().split("T")[0];
+        console.log("Filtering by date:", createdStr, startStr);
+        return createdStr >= startStr;
+      });
     }
   }
 
@@ -830,7 +839,7 @@ const validatedCount = computed(
   () => store.inscriptions.filter((item) => item.validated).length
 );
 const tokensGeneratedCount = computed(
-  () => store.inscriptions.filter((item) => item.token).length
+  () => store.inscriptions.filter((item) => item.bearer_token).length
 );
 
 // Methods
@@ -847,19 +856,15 @@ const refreshData = () => {
   generateSampleData();
 };
 
-const validateInscription = (inscription) => {
-  // In a real app, this would call an API to validate the inscription
-  const index = store.inscriptions.findIndex((item) => item.id === inscription.id);
-  if (index !== -1) {
-    store.inscriptions[index].validated = true;
-  }
+const onValidate = async (id: number) => {
+  await store.validateInscription(id);
 };
 
 const copyToken = async () => {
-  if (selectedInscription.value?.token) {
+  if (selectedInscription.value?.bearer_token) {
     try {
       // Use the Clipboard API to copy the text
-      await navigator.clipboard.writeText(selectedInscription.value.token);
+      await navigator.clipboard.writeText(selectedInscription.value.bearer_token);
 
       // Set copied state to true to show feedback
       copied.value = true;
@@ -869,13 +874,13 @@ const copyToken = async () => {
         copied.value = false;
       }, 2000);
 
-      console.log("Token copied to clipboard:", selectedInscription.value.token);
+      console.log("Token copied to clipboard:", selectedInscription.value.bearer_token);
     } catch (err) {
       console.error("Failed to copy token:", err);
 
       // Fallback method for older browsers
       const textArea = document.createElement("textarea");
-      textArea.value = selectedInscription.value.token;
+      textArea.value = selectedInscription.value.bearer_token;
       textArea.style.position = "fixed";
       textArea.style.left = "-999999px";
       textArea.style.top = "-999999px";
@@ -908,12 +913,16 @@ const generateToken = (inscription) => {
   const index = store.inscriptions.findIndex((item) => item.id === inscription.id);
   if (index !== -1) {
     // Generate the token
-    const newToken = generateRandomToken();
+    const tokenInfo = store.generateToken(inscription.id);
 
+    if (!tokenInfo) {
+      console.error("Failed to generate token for inscription:", inscription.id);
+      return;
+    }
     // Update the inscription in the array
     store.inscriptions[index] = {
       ...store.inscriptions[index],
-      token: newToken,
+      token: tokenInfo.bearer_token,
     };
 
     // Set the selected inscription for the modal

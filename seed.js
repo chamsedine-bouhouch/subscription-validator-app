@@ -8,13 +8,12 @@ dotenv.config();
   try {
     console.log('🌱 Starting seed process...');
 
-    // Reset and sync DB
-    await sequelize.sync({ force: true });
-
+    await sequelize.sync({ force: true })
     // 1. Create default admin user
     //  (password will be hashed via model hook)
     const adminUser = await User.create({
       email: 'admin@example.com',
+      name: 'Chamseddine Bouhouch',
       password: 'admin123',
       role: 'admin',
     });
