@@ -651,7 +651,9 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
+import { useAuthStore } from "@/stores/auth"; // adjust the path as needed
 
+const authStore = useAuthStore();
 // Sample data - replace with actual API calls in production
 const inscriptions = ref([]);
 const currentPage = ref(1);
@@ -667,10 +669,8 @@ const copied = ref(false);
 
 // Add these to the script setup section, after the other refs
 const profileDropdownOpen = ref(false);
-const user = ref({
-  name: "John Doe",
-  email: "john.doe@example.com",
-});
+
+const user = computed(() => authStore.user);
 
 // Add this computed property
 const userInitials = computed(() => {
@@ -708,31 +708,11 @@ const navigateToSettings = () => {
 };
 
 const logout = () => {
-  // Close the dropdown
   profileDropdownOpen.value = false;
+  authStore.logout();
 
-  // 1. Remove the authentication token
-  localStorage.removeItem("auth_token"); // Remove token from localStorage
-  sessionStorage.removeItem("auth_token"); // Also check sessionStorage
-
-  // 2. Clear any other user data from storage
-  localStorage.removeItem("user_data");
-
-  // 3. Optional: Clear cookies if you're using them for auth
-  // document.cookie.split(";").forEach(cookie => {
-  //   const eqPos = cookie.indexOf("=");
-  //   const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
-  //   document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
-  // });
-
-  // 4. Redirect to login page
-  // If using Vue Router:
-  window.location.href = "/"; // Fallback for any routing system
-
-  // If you're using Vue Router, you could use this instead:
-  // router.push('/');
-
-  console.log("User logged out successfully");
+  // Redirect to login page
+  window.location.href = "/";
 };
 
 // Generate sample data
