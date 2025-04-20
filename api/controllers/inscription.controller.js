@@ -1,9 +1,9 @@
 import { getAll, create, validate, generateToken } from '../services/inscription.service.js';
 import { buildSOAPInscription, buildSOAPInscriptionsResponse } from '../utils/soap-formatter.js';
 import {
-    BadRequestException,
     InternalServerErrorException,
 } from '../utils/exceptions.js';
+import { InscriptionSchema } from '../validators/inscription.schema.js';
 
 export const getAllInscriptions = async (req, res, next) => {
     try {
@@ -30,10 +30,8 @@ export const createInscription = async (req, res, next) => {
     try {
         if (contentType.includes('application/json')) {
             // ✅ JSON input
-            const { name, lastname, email } = req.body;
-            if (!name || !lastname || !email) {
-                throw new BadRequestException('Missing required fields');
-            }
+            const parsed = InscriptionSchema.parse(req.body);
+            ({ name, lastname, email } = parsed);
 
 
         } else if (contentType.includes('xml')) {
@@ -42,11 +40,13 @@ export const createInscription = async (req, res, next) => {
             const inscriptionNode =
                 req.body?.['soapenv:envelope']?.['soapenv:body']?.[0]?.['inscriptionrequest']?.[0]
 
-            console.log('inscriptionNode', inscriptionNode);
+            const parsed = InscriptionSchema.parse({
+                name: inscriptionNode?.name?.[0],
+                lastname: inscriptionNode?.lastname?.[0],
+                email: inscriptionNode?.email?.[0],
+            });
 
-            email = inscriptionNode?.email?.[0]
-            name = inscriptionNode?.name?.[0]
-            lastname = inscriptionNode?.lastname?.[0]
+            ({ name, lastname, email } = parsed);
         }
         const inscription = await create({ name, lastname, email });
 
