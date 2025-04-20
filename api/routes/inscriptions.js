@@ -7,6 +7,6 @@ const router = express.Router();
 router.get('/', authGuard('user', 'admin'), getAllInscriptions);
 router.post('/', createInscription);
 router.post('/:id/validate', validateInscription);
-router.post('/token/:id', generateBearerToken);
+router.post('/:id/token', generateBearerToken);
 
 export default router;

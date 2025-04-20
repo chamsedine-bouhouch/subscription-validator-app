@@ -1,0 +1,226 @@
+openapi: 3.0.0
+info:
+  title: Subscription Validator API
+  version: 1.0.0
+  description: API for handling user login and managing inscriptions.
+
+servers:
+  - url: http://localhost:3000/api/
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+
+    LoginResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        token:
+          type: string
+
+    Inscription:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        lastname:
+          type: string
+        email:
+          type: string
+        validated:
+          type: boolean
+        bearer_token:
+          type: string
+          nullable: true
+        validation_date:
+          type: string
+          nullable: true
+        user_id:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+paths:
+  /auth/login:
+    post:
+      summary: User login to receive JWT
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+          text/xml:
+            schema:
+              type: string
+            example: |
+              <?xml version="1.0" encoding="UTF-8"?>
+              <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+                <soapenv:Body>
+                  <LoginRequest>
+                    <email>admin@example.com</email>
+                    <password>admin123</password>
+                  </LoginRequest>
+                </soapenv:Body>
+              </soapenv:Envelope>
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Invalid credentials
+
+  /inscriptions:
+    get:
+      summary: Get all inscriptions
+      security:
+        - BearerAuth: []
+      tags: [Inscriptions]
+      responses:
+        "200":
+          description: List of inscriptions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Inscription"
+        "401":
+          description: Unauthorized
+
+    post:
+      summary: Create a new inscription (JSON or XML input supported)
+      security:
+        - BearerAuth: []
+      tags: [Inscriptions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, lastname, email]
+              properties:
+                name:
+                  type: string
+                lastname:
+                  type: string
+                email:
+                  type: string
+            example:
+              name: John
+              lastname: Doe
+              email: john.doe@example.com
+          text/xml:
+            schema:
+              type: string
+            example: |
+              <?xml version="1.0" encoding="UTF-8"?>
+              <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+                <soapenv:Body>
+                  <InscriptionRequest>
+                    <name>John</name>
+                    <lastname>Doe</lastname>
+                    <email>john.doe@example.com</email>
+                  </InscriptionRequest>
+                </soapenv:Body>
+              </soapenv:Envelope>
+      responses:
+        "201":
+          description: Inscription created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Inscription"
+            text/xml:
+              schema:
+                type: string
+        "400":
+          description: Bad request - missing required fields
+
+  /inscriptions/{id}/validate:
+    post:
+      summary: Validate an inscription
+      security:
+        - BearerAuth: []
+      tags: [Inscriptions]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Validation response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+            text/xml:
+              schema:
+                type: string
+        "404":
+          description: Inscription not found
+
+  /inscriptions/{id}/token:
+    post:
+      summary: Generate bearer token for an inscription
+      security:
+        - BearerAuth: []
+      tags: [Inscriptions]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Token generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  bearer_token:
+                    type: string
+            text/xml:
+              schema:
+                type: string
+        "404":
+          description: Inscription not found

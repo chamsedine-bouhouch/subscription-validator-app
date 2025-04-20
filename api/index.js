@@ -2,7 +2,6 @@ import dotenv from 'dotenv';
 dotenv.config();
 import express from 'express';
 import cors from 'cors';
- 
 
 import authRoutes from './routes/auth.js';
 import inscriptionsRoutes from './routes/inscriptions.js';
@@ -11,12 +10,22 @@ import userRoutes from './routes/users.js';
 import sequelize from './db.js'
 import { errorHandler } from './middlewares/error-handler.js';
 import xmlparser from 'express-xml-bodyparser';
+import swaggerUi from 'swagger-ui-express'
+import YAML from 'yamljs';
+import path from 'path'
 
 sequelize.sync({ alter: true }) // or { force: true } to drop & recreate
   .then(() => console.log('Database synced!'))
   .catch((err) => console.error('Sync error:', err));
 
 const app = express();
+// Load the OpenAPI YAML file
+const swaggerDocument = YAML.load(path.join(process.cwd(), 'docs/openapi.yaml'))
+
+// Serve Swagger UI at /api-docs
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+
+
 // ✅ Enable CORS
 app.use(
   cors({
