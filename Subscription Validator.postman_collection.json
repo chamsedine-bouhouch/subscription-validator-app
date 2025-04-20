@@ -1,0 +1,299 @@
+{
+	"info": {
+		"_postman_id": "6580107a-d9b7-4bbb-be3e-9e5e652413c1",
+		"name": "Subscription Validator",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "SOAP",
+			"item": [
+				{
+					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "text/xml;charset=UTF-8;",
+								"type": "default"
+							},
+							{
+								"key": "SOAPAction",
+								"value": ".Login",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n  <soapenv:Body>\r\n    <LoginRequest>\r\n      <email>admin@example.com</email>\r\n      <password>admin123</password>\r\n    </LoginRequest>\r\n  </soapenv:Body>\r\n</soapenv:Envelope>\r\n",
+							"options": {
+								"raw": {
+									"language": "html"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "inscriptions",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEiLCJuYW1lIjoiQ2hhbXNlZGRpbmUgQm91aG91Y2giLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzQ1MTM1ODE2LCJleHAiOjE3NDUyMjIyMTZ9.rwg6nA4qc1bBByFtfkVda6YplYIkpAnr_eZZERj6350",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "text/xml",
+								"type": "default"
+							},
+							{
+								"key": "Accept",
+								"value": "text/xml",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/api/inscriptions",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"inscriptions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "inscriptions",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEiLCJuYW1lIjoiQ2hhbXNlZGRpbmUgQm91aG91Y2giLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzQ1MTM1ODE2LCJleHAiOjE3NDUyMjIyMTZ9.rwg6nA4qc1bBByFtfkVda6YplYIkpAnr_eZZERj6350",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "text/xml",
+								"type": "default"
+							},
+							{
+								"key": "Accept",
+								"value": "text/xml",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n    <soapenv:Body>\r\n        <inscriptionRequest>\r\n            <name>Chams</name>\r\n            <lastname>test SOAP</lastname>\r\n            <email>chams@soap4.com</email>\r\n        </inscriptionRequest>\r\n    </soapenv:Body>\r\n</soapenv:Envelope>"
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/inscriptions",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"inscriptions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "generate token",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEiLCJuYW1lIjoiQ2hhbXNlZGRpbmUgQm91aG91Y2giLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzQ1MTM1ODE2LCJleHAiOjE3NDUyMjIyMTZ9.rwg6nA4qc1bBByFtfkVda6YplYIkpAnr_eZZERj6350",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "text/xml",
+								"type": "default"
+							},
+							{
+								"key": "Accept",
+								"value": "text/xml",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/api/inscriptions/token/10",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"inscriptions",
+								"token",
+								"10"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "validate inscription",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEiLCJuYW1lIjoiQ2hhbXNlZGRpbmUgQm91aG91Y2giLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzQ1MTM1ODE2LCJleHAiOjE3NDUyMjIyMTZ9.rwg6nA4qc1bBByFtfkVda6YplYIkpAnr_eZZERj6350",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "text/xml",
+								"type": "default"
+							},
+							{
+								"key": "Accept",
+								"value": "text/xml",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n    <soapenv:Body>\r\n        <inscriptionRequest>\r\n            <name>Chams</name>\r\n            <lastname>test SOAP</lastname>\r\n            <email>chams@soap4.com</email>\r\n        </inscriptionRequest>\r\n    </soapenv:Body>\r\n</soapenv:Envelope>"
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/inscriptions/4/validate",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"inscriptions",
+								"4",
+								"validate"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "login",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/xml;charset=UTF-8;",
+						"type": "default"
+					},
+					{
+						"key": "SOAPAction",
+						"value": ".Login",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"admin@example.com\",\r\n    \"password\": \"admin123\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/auth/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "apiUrl",
+			"value": "http://localhost:3000/api",
+			"type": "string"
+		}
+	]
+}
