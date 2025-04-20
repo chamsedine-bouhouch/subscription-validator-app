@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { UnauthorizedException, ForbiddenException } from '../utils/exceptions.js';
-import { hasRole } from '../utils/hasRole.js';
+import { hasRole } from '../utils/has-role.js';
 
 export const authGuard = (...roles) => {
     return async (req, res, next) => {

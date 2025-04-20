@@ -41,7 +41,7 @@ export const useInscriptionStore = defineStore('inscription', () => {
 
   const generateToken = async (id: number) => {
     try {
-      const response = await api.get(`/inscriptions/token/${id}`)
+      const response = await api.post(`/inscriptions/token/${id}`)
       const index = inscriptions.value.findIndex((item) => item.id === id)
       if (index !== -1) {
         inscriptions.value[index].bearer_token = response.data.bearer_token

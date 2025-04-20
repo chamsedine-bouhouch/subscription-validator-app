@@ -1,6 +1,6 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../db.js';
-import { hashPassword } from '../utils/hashPassword.js';
+import { hashPassword } from '../utils/hash-password.js';
 
 const User = sequelize.define('User', {
   id: {

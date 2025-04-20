@@ -2,14 +2,15 @@ import dotenv from 'dotenv';
 dotenv.config();
 import express from 'express';
 import cors from 'cors';
-
+ 
 
 import authRoutes from './routes/auth.js';
 import inscriptionsRoutes from './routes/inscriptions.js';
-import userRoutes from './routes/userRoutes.js';
+import userRoutes from './routes/users.js';
 
 import sequelize from './db.js'
-import { errorHandler } from './middlewares/errorHandler.js';
+import { errorHandler } from './middlewares/error-handler.js';
+import xmlparser from 'express-xml-bodyparser';
 
 sequelize.sync({ alter: true }) // or { force: true } to drop & recreate
   .then(() => console.log('Database synced!'))
@@ -27,6 +28,8 @@ app.use(
 // Middlewares
 
 app.use(express.json());
+app.use(xmlparser()) // parse le XML en JS object 
+
 app.use(express.urlencoded({ extended: true }));
 
 // Root route — for testing DB connection

@@ -852,8 +852,7 @@ const formatDate = (date) => {
 };
 
 const refreshData = () => {
-  // In a real app, this would fetch fresh data from the API
-  generateSampleData();
+  store.fetchInscriptions();
 };
 
 const onValidate = async (id: number) => {
